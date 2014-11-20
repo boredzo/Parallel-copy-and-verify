@@ -8,9 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #include <sysexits.h>
-#if CHECK_MD5s
-#include <CommonCrypto/CommonCrypto.h>
-#endif
 
 #define MILLIONS(a,b,c) a##b##c
 static const size_t kBufferSize = MILLIONS(10,000,000);
@@ -51,25 +48,12 @@ int main(int argc, char *argv[]) {
 		NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
 		__block NSTimeInterval lastRateLogDate = 0.0;
 
-#if CHECK_MD5s
-		CC_MD5_CTX readMD5Context, writeMD5Context;
-		CC_MD5_Init(&readMD5Context);
-		CC_MD5_Init(&writeMD5Context);
-		unsigned char readMD5Digest[CC_MD5_DIGEST_LENGTH];
-#endif
-
 		int readNumber = 0;
 		int writeNumber = 0;
 		ssize_t amtRead;
 		while (0 < (amtRead = read(inFD, buffers[currentBufferIdx], kBufferSize))) {
 			const void *currentBuffer = buffers[currentBufferIdx];
 			currentBufferIdx = ! currentBufferIdx;
-
-#if CHECK_MD5s
-			CC_MD5_Update(&readMD5Context, currentBuffer, (CC_LONG)amtRead);
-			CC_MD5_Final(readMD5Digest, &readMD5Context);
-			NSData *readMD5Data = [NSData dataWithBytes:readMD5Digest length:CC_MD5_DIGEST_LENGTH];
-#endif
 
 			if (verbose) {
 				++readNumber;
@@ -95,9 +79,6 @@ int main(int argc, char *argv[]) {
 				const void *bytesYetToBeWritten = currentBuffer;
 				size_t numBytesYetToBeWritten = (size_t)amtRead;
 				while (0 < (thisWrite = write(outFD, bytesYetToBeWritten, numBytesYetToBeWritten))) {
-#if CHECK_MD5s
-					CC_MD5_Update(&writeMD5Context, bytesYetToBeWritten, (CC_LONG)numBytesYetToBeWritten);
-#endif
 					amtWritten += thisWrite;
 					bytesYetToBeWritten += thisWrite;
 					numBytesYetToBeWritten -= thisWrite;
@@ -106,27 +87,6 @@ int main(int argc, char *argv[]) {
 					}
 				}
 				totalAmountWritten += amtWritten;
-
-#if CHECK_MD5s
-				unsigned char writeMD5Digest[CC_MD5_DIGEST_LENGTH];
-				const unsigned char *writeMD5DigestPtr = writeMD5Digest;
-				CC_MD5_Final(writeMD5Digest, &writeMD5Context);
-				if (verbose) {
-					dispatch_sync(logQueue, ^{
-						fprintf(stderr, "Write number #%d; first bytes of write MD5 are 0x%02x%02x%02x%02x\n",
-							writeNumber,
-							writeMD5DigestPtr[0], writeMD5DigestPtr[1], writeMD5DigestPtr[2], writeMD5DigestPtr[3]
-						);
-					});
-				}
-				const unsigned char *readMD5DigestPtr = readMD5Data.bytes;
-				if (0 != memcmp(readMD5DigestPtr, writeMD5Digest, CC_MD5_DIGEST_LENGTH)) {
-					dispatch_sync(logQueue, ^{
-						fprintf(stderr, "Oh crap! MD5s no longer match between read and write! Bailing now!\n");
-						exit(EXIT_FAILURE);
-					});
-				}
-#endif
 
 				if (thisWrite < 0) {
 					int writeError = errno;
