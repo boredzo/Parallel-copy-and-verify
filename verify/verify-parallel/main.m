@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 					}
 					if (leftChunkSize < rightChunkSize) {
 						rightData = [rightData subdataWithRange:(NSRange){ 0, leftChunkSize }];
-						rightChunkSize = leftChunkSize;
+						//rightChunkSize = leftChunkSize;
 						//TODO: Seek rightFH to leftFH's tell
 					} else if (rightChunkSize < leftChunkSize) {
 						leftData = [leftData subdataWithRange:(NSRange){ 0, rightChunkSize }];

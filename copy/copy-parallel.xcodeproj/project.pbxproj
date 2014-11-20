@@ -24,6 +24,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		319852061A1DAD58009BB19F /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Warnings.xcconfig; path = ../Warnings/Warnings.xcconfig; sourceTree = "<group>"; };
 		31BEBBCE1A06A08A001E3F8F /* copy-parallel */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "copy-parallel"; sourceTree = BUILT_PRODUCTS_DIR; };
 		31BEBBD11A06A08A001E3F8F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		31BEBBD41A06A08A001E3F8F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -45,6 +46,7 @@
 		31BEBBC51A06A08A001E3F8F = {
 			isa = PBXGroup;
 			children = (
+				319852061A1DAD58009BB19F /* Warnings.xcconfig */,
 				31BEBBD31A06A08A001E3F8F /* copy-parallel */,
 				31BEBBD01A06A08A001E3F8F /* Frameworks */,
 				31BEBBCF1A06A08A001E3F8F /* Products */,
@@ -144,6 +146,7 @@
 /* Begin XCBuildConfiguration section */
 		31BEBBDA1A06A08A001E3F8F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 319852061A1DAD58009BB19F /* Warnings.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -181,6 +184,7 @@
 		};
 		31BEBBDB1A06A08A001E3F8F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 319852061A1DAD58009BB19F /* Warnings.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";

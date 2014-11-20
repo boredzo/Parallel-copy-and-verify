@@ -14,9 +14,12 @@ static const size_t kBufferSize = MILLIONS(10,000,000);
 
 #define ONE_MINUTE_NSEC (60 * NSEC_PER_SEC)
 
-static const bool verbose = false;
+static bool verbose = false;
 
 int main(int argc, char *argv[]) {
+	if (argc > 1 && strcmp(argv[1], "--verbose") == 0) {
+		verbose = true;
+	}
 	if (argc < 3 || argc > 5) {
 		bool justAskingForHelp = (argc <= 1);
 		fprintf(justAskingForHelp ? stdout : stderr,
@@ -74,21 +77,21 @@ int main(int argc, char *argv[]) {
 						);
 					});
 				}
-				ssize_t amtWritten = 0;
-				ssize_t thisWrite;
+				size_t portionOfReadWritten = 0;
+				ssize_t amtWritten;
 				const void *bytesYetToBeWritten = currentBuffer;
 				size_t numBytesYetToBeWritten = (size_t)amtRead;
-				while (0 < (thisWrite = write(outFD, bytesYetToBeWritten, numBytesYetToBeWritten))) {
-					amtWritten += thisWrite;
-					bytesYetToBeWritten += thisWrite;
-					numBytesYetToBeWritten -= thisWrite;
-					if (amtWritten == amtRead) {
+				while (0 < (amtWritten = write(outFD, bytesYetToBeWritten, numBytesYetToBeWritten))) {
+					portionOfReadWritten += (size_t)amtWritten;
+					bytesYetToBeWritten += amtWritten;
+					numBytesYetToBeWritten -= (size_t)amtWritten;
+					if (portionOfReadWritten == (size_t)amtRead) {
 						break;
 					}
 				}
-				totalAmountWritten += amtWritten;
+				totalAmountWritten += portionOfReadWritten;
 
-				if (thisWrite < 0) {
+				if (amtWritten < 0) {
 					int writeError = errno;
 					dispatch_sync(logQueue, ^{
 						fprintf(stderr, "Error during write: %s\n", strerror(writeError));
@@ -114,7 +117,8 @@ int main(int argc, char *argv[]) {
 				exit(EX_IOERR);
 			}
 		}
-		EX_NOINPUT;
+		free(buffers[0]);
+		free(buffers[1]);
 	}
     return EXIT_SUCCESS;
 }
