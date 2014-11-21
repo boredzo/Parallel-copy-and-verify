@@ -10,7 +10,7 @@ The first command will copy all of the bytes from /dev/disk1, until that file is
 
 The second command will compare the common prefix of both files (if one is shorter, anything beyond that length in the longer file is not considered) and report if it finds a difference.
 
-copy-parallel currently emits a progress update on stdout every ten seconds, whereas verify-parallel emits a single report at the end (whether “the end” is after successfully proving both files equal, or after encountering a difference).
+copy-parallel currently emits a progress update on stdout every two seconds, whereas verify-parallel emits a single report at the end (whether “the end” is after successfully proving both files equal, or after encountering a difference).
 
 ### Ways in which these programs presume you are using them on devices
 
