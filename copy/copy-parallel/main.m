@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 		};
 		int currentBufferIdx = 0;
 
-		dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+		dispatch_semaphore_t semaphore = dispatch_semaphore_create(1);
 
 		int inFD = open(argv[1], O_RDONLY);
 		int outFD = open(argv[2], O_WRONLY | O_TRUNC | O_EXLOCK);
@@ -50,6 +50,8 @@ int main(int argc, char *argv[]) {
 		__block unsigned long long totalAmountWritten = 0;
 		NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
 		__block NSTimeInterval lastRateLogDate = 0.0;
+
+		dispatch_group_t group = dispatch_group_create();
 
 		int readNumber = 0;
 		int writeNumber = 0;
@@ -68,7 +70,7 @@ int main(int argc, char *argv[]) {
 				});
 				++writeNumber;
 			}
-			dispatch_async(writeQueue, ^{
+			dispatch_group_async(group, writeQueue, ^{
 				if (verbose) {
 					dispatch_sync(logQueue, ^{
 						fprintf(stderr, "Write number #%d; first bytes are 0x%02x%02x%02x%02x\n",
@@ -117,8 +119,15 @@ int main(int argc, char *argv[]) {
 				exit(EX_IOERR);
 			}
 		}
-		free(buffers[0]);
-		free(buffers[1]);
+
+		//Free the buffers on the (serial) write queue so that we know all writes have completed by then.
+		void *bufferOnTheLeft = buffers[0];
+		void *bufferOnTheRight = buffers[1];
+		dispatch_group_async(group, writeQueue, ^{
+			free(bufferOnTheLeft);
+			free(bufferOnTheRight);
+		});
+		dispatch_group_wait(group, ONE_MINUTE_NSEC);
 	}
     return EXIT_SUCCESS;
 }
